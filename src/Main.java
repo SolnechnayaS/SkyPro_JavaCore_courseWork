@@ -2,14 +2,15 @@ import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class Main extends TaskService {
-    public static void main(String[] args) throws IncorrectArgumentException {
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) throws IncorrectArgumentException, TaskNotFoundException {
+
         System.out.println("Вас приветствует ежедневник Светланы Морозовой! Что будем делать?");
+
         mainMenu();
 
     }
 
-    public static void mainMenu() {
+    public static void mainMenu() throws IncorrectArgumentException, TaskNotFoundException {
         System.out.println("1 - Добавить новую задачу;\n" +
                 "2 - Редактировать задачу;\n" +
                 "3 - Удалить/завершить задачу;\n" +
@@ -17,7 +18,7 @@ public class Main extends TaskService {
                 "5 - Получить календарь задач;\n" +
                 "6 - Получить список всех удаленных/завершенных задач;\n" +
                 "7 - Завершить работу программы;\n");
-        int number = scanner.nextInt();
+        int number = inputInt();
         switch (number) {
             case 1:
                 System.out.println("Выбрано: добавить новую задачу");
@@ -26,15 +27,17 @@ public class Main extends TaskService {
                 mainMenu();
             case 2:
                 System.out.println("Выбрано: редактировать задачу");
-                System.out.println("Введите id задачи: ");
-                int idNumber = scanner.nextInt();
-                editTask(idNumber);
+                int idNumberEdit = TaskService.findTask();
+                System.out.println("Редактирование задачи id="+idNumberEdit);
+                System.out.println(getTaskMap().get(idNumberEdit));
+                editTask(idNumberEdit);
             case 3:
                 System.out.println("Выбрано: удалить/завершить задачу");
-                System.out.println("Введите id задачи: ");
-                int idNumberDel = scanner.nextInt();
+                int idNumberDel = TaskService.findTask();
+                System.out.println("Удаление задачи id="+idNumberDel);
+                System.out.println(getTaskMap().get(idNumberDel));
                 TaskService.remove(idNumberDel);
-                System.out.println("Задача id=" +idNumberDel+" успешно удалена и перенесена в список завершенных задач. Выберите следующее действие:");
+                System.out.println("Задача id="+idNumberDel+" успешно удалена и перенесена в список завершенных задач. Выберите следующее действие:");
                 mainMenu();
             case 4:
                 System.out.println("Выбрано: получить список задач на дату");
@@ -42,7 +45,7 @@ public class Main extends TaskService {
                         "1 - Сегодня;" +
                         "2 - Завтра;" +
                         "3 - Произвольная дата;");
-                int dateNumber = scanner.nextInt();
+                int dateNumber = inputInt();
                 switch (dateNumber) {
                     case 1:
                         System.out.println("Список задач на СЕГОДНЯ:");
@@ -69,7 +72,7 @@ public class Main extends TaskService {
                 mainMenu();
             case 7:
                 System.out.println("ДО СВИДАНИЯ! Возвращайтесь скорее!");
-                scanner.close();
+                System.exit(0);
                 break;
             default:
                 System.out.println("Неверное значение! Попробуйте еще раз");
@@ -77,14 +80,15 @@ public class Main extends TaskService {
                 break;
         }
     }
-    public static void editTask(int idNumber) {
+
+    public static void editTask(int idNumber) throws IncorrectArgumentException, TaskNotFoundException {
         System.out.println("Что будем редактировать:" +
                 "1 - Заголовок;\t" +
                 "2 - Описание;\t" +
                 "3 - Тип задачи: Личная/Рабочая;\t" +
                 "4 - Повторяемость;\n" +
                 "5 - Завершить редактирование / Выход в главное меню");
-        int editNumber = scanner.nextInt();
+        int editNumber = inputInt();
 
         switch (editNumber) {
             case 1:
@@ -119,7 +123,7 @@ public class Main extends TaskService {
                 System.out.println("Редактирование задачи завершено");
                 mainMenu();
             default:
-                System.out.println("Выбрано некорректное значение, редактирование задачи завершеное. Выход в Главное меню");
+                System.out.println("Выбрано некорректное значение, редактирование задачи завершено. Выход в Главное меню");
                 mainMenu();
         }
 
@@ -130,12 +134,10 @@ public class Main extends TaskService {
         try {
             int input = scannerInput.nextInt();
             return input;
-        }
-        catch (RuntimeException e) {
-            throw new IncorrectArgumentException("Введено нечисловое значение");
-        }
-        finally {
-            scannerInput.close();
+        } catch (RuntimeException e) {
+//            throw new IncorrectArgumentException("Введено нечисловое значение");
+            System.out.println("Введено нечисловое значение");
+            return -1;
         }
     }
 }

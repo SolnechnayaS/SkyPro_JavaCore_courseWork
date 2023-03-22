@@ -2,13 +2,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Arrays.stream;
 
 public class TaskService {
     static Scanner scanner = new Scanner(System.in);
@@ -17,11 +12,11 @@ public class TaskService {
     private static Map<Integer, Task> taskMap = new HashMap<>();
     private static Collection<Task> removedTasks = new ArrayList<>();
 
-    public static void add() {
+    public static void add() throws IncorrectArgumentException {
         System.out.println("Введите название задачи: ");
-        String title = scanner.next();
+        String title = scanner.useDelimiter("\n").next();
         System.out.println("Введите описание задачи: ");
-        String description = scanner.next();
+        String description = scanner.useDelimiter("\n").next();
 
         System.out.println("Выберите тип задачи (по умолчанию значение " + Task.typeDefault + "):\n" +
                 "1 - Личная;\t" +
@@ -41,9 +36,6 @@ public class TaskService {
         taskMap.put(newTask.getId(), newTask);
     }
 
-
-
-
     public static Task updateTitle(int id, String title) {
         Task temp = taskMap.get(id);
         temp.setTitle(title);
@@ -56,8 +48,8 @@ public class TaskService {
         return taskMap.put(temp.getId(), temp);
     }
 
-    static AppearsIn setAppearsIn() {
-        int appearsInNumber = scanner.nextInt();
+    static AppearsIn setAppearsIn() throws IncorrectArgumentException {
+        int appearsInNumber = Main.inputInt();
         AppearsIn appearsIn = null;
         switch (appearsInNumber) {
             case 1:
@@ -87,8 +79,8 @@ public class TaskService {
         return appearsIn;
     }
 
-    static TypeTask setTypeTask() {
-        int typeNumber = scanner.nextInt();
+    static TypeTask setTypeTask() throws IncorrectArgumentException {
+        int typeNumber = Main.inputInt();
         TypeTask type = null;
         switch (typeNumber) {
             case 1:
@@ -162,6 +154,21 @@ public class TaskService {
         }
 
         return allGroupeByDate;
+    }
+
+    public static int findTask() throws IncorrectArgumentException, TaskNotFoundException {
+        System.out.println("Введите id задачи: ");
+        int idNumber = Main.inputInt();
+        try {
+            taskMap.get(idNumber).toString();
+        }
+        catch (RuntimeException e) {
+//            throw new TaskNotFoundException ("Некорректный id");
+            System.out.println("Некорректный id");
+            idNumber = findTask();
+        }
+        return idNumber;
+
     }
 
 }

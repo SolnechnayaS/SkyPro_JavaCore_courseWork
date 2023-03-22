@@ -116,13 +116,14 @@ public class Task {
 
     @Override
     public String toString() {
-        return "{id=" + id +
-                ", дата/время: " + dataTime.format(dtfFull) +
-                ", заголовок: " + title +
-                ", описание: " + description +
-                ", тип: " + type +
-                ", повторяемость: " + appearsIn +
+        return "{id=" + id   +
+                ",\nдата/время: " + dataTime.format(dtfFull)  +
+                ",\nзаголовок: " + title  +
+                ",\nописание: " + description +
+                ",\nтип: " + type   +
+                ",\nповторяемость: " + appearsIn   +
                 "}";
-    }
+
+}
 
 }
