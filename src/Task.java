@@ -1,12 +1,10 @@
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class Task {
     static DateTimeFormatter dtfFull = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-    private static int idGenerator =0;
+    private static int idGenerator = 0;
     private final int id;
     private final LocalDateTime dataTime;
     private String title;
@@ -17,7 +15,7 @@ public class Task {
     static final String titleDefault = "Без названия";
     static final String descriptionDefault = "Описание не заполнено";
     static final TypeTask typeDefault = TypeTask.PERSONAL;
-    static final AppearsIn appearsInDefault=AppearsIn.ONE_TIME_TASK;
+    static final AppearsIn appearsInDefault = AppearsIn.ONE_TIME_TASK;
 
     public int getIdGenerator() {
         return idGenerator;
@@ -67,37 +65,38 @@ public class Task {
         this.appearsIn = appearsIn;
     }
 
-    public Task(String title, String description, TypeTask type, AppearsIn appearsIn) {
-        this.id = getIdGenerator()+1;
+    public Task(String title, String description, TypeTask type, AppearsIn appearsIn, LocalDateTime dataTime) {
+        this.id = getIdGenerator() + 1;
         setIdGenerator(this.id);
-        this.dataTime = LocalDateTime.now();
 
-        if (title==null || title.isBlank()) {
-            this.title =titleDefault;
-        }
-        else {
+        if (title == null || title.isBlank()) {
+            this.title = titleDefault;
+        } else {
             this.title = title;
         }
 
-        if (description==null || description.isBlank()) {
-            this.description =descriptionDefault;
-        }
-        else {
+        if (description == null || description.isBlank()) {
+            this.description = descriptionDefault;
+        } else {
             this.description = description;
         }
 
-        if (type==null) {
-            this.type =typeDefault;
-        }
-        else {
+        if (type == null) {
+            this.type = typeDefault;
+        } else {
             this.type = type;
         }
 
-        if (appearsIn==null) {
-            this.appearsIn =appearsInDefault;
-        }
-        else {
+        if (appearsIn == null) {
+            this.appearsIn = appearsInDefault;
+        } else {
             this.appearsIn = appearsIn;
+        }
+
+        if (dataTime == null) {
+            this.dataTime = LocalDateTime.now();
+        } else {
+            this.dataTime = dataTime;
         }
     }
 
@@ -116,14 +115,14 @@ public class Task {
 
     @Override
     public String toString() {
-        return "{id=" + id   +
-                ",\nдата/время: " + dataTime.format(dtfFull)  +
-                ",\nзаголовок: " + title  +
-                ",\nописание: " + description +
-                ",\nтип: " + type   +
-                ",\nповторяемость: " + appearsIn   +
+        return "{id=" + id +
+                ", дата/время: " + dataTime.format(dtfFull) +
+                ", заголовок: " + title +
+                ", описание: " + description +
+                ", тип: " + type +
+                ", повторяемость: " + appearsIn +
                 "}";
 
-}
+    }
 
 }

@@ -1,16 +1,14 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TaskService {
     static Scanner scanner = new Scanner(System.in);
-    static DateTimeFormatter dtfOnlyDate = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private final static Map<Integer, Task> taskMap = new HashMap<>();
+    private final static Collection<Task> removedTasks = new ArrayList<>();
 
-    private static Map<Integer, Task> taskMap = new HashMap<>();
-    private static Collection<Task> removedTasks = new ArrayList<>();
 
     public static void add() throws IncorrectArgumentException {
         System.out.println("Введите название задачи: ");
@@ -32,25 +30,20 @@ public class TaskService {
         );
         AppearsIn appearsIn = setAppearsIn();
 
-        Task newTask = new Task(title, description, type, appearsIn);
-        taskMap.put(newTask.getId(), newTask);
+        repeatTask(title, description, type, appearsIn);
     }
 
-    public static Task updateTitle(int id, String title) {
-        Task temp = taskMap.get(id);
-        temp.setTitle(title);
-        return taskMap.put(temp.getId(), temp);
+    public static void updateTitle(int id, String title) {
+        taskMap.get(id).setTitle(title);
     }
 
-    public static Task updateDescription(int id, String description) {
-        Task temp = taskMap.get(id);
-        temp.setDescription(description);
-        return taskMap.put(temp.getId(), temp);
+    public static void updateDescription(int id, String description) {
+        taskMap.get(id).setDescription(description);
     }
 
     static AppearsIn setAppearsIn() throws IncorrectArgumentException {
         int appearsInNumber = Main.inputInt();
-        AppearsIn appearsIn = null;
+        AppearsIn appearsIn;
         switch (appearsInNumber) {
             case 1:
                 System.out.println("Выбран тип - Однократная задача\n");
@@ -74,6 +67,7 @@ public class TaskService {
                 break;
             default:
                 System.out.println("Выбран некорректный тип, оставлено значение по умолчанию\n");
+                appearsIn = Task.appearsInDefault;
                 break;
         }
         return appearsIn;
@@ -119,33 +113,37 @@ public class TaskService {
         return removedTasks;
     }
 
+
     public static Map<Integer, Task> getTaskMap() {
         return taskMap;
     }
 
     public static Collection<Task> getAllByDate(LocalDateTime localDate) {
-        Predicate<Task> taskPredicateDate = new Predicate<>() {
-            @Override
-            public boolean test(Task task) {
-                return task.getDataTime().toLocalDate().equals(localDate.toLocalDate());
-            }
-        };
+        Predicate<Task> taskPredicateDate = task -> task.getDataTime().toLocalDate().equals(localDate.toLocalDate());
 
-        Collection<Task> allTask = taskMap
+        return taskMap
                 .values()
                 .stream()
                 .filter(taskPredicateDate)
                 .collect(Collectors.toList());
-        return allTask;
     }
+
 
     public static Map<LocalDate, Collection<Task>> getAllGroupeByDate() {
 
-        Map<LocalDate, Collection<Task>> allGroupeByDate = new HashMap<>();
+        Comparator<LocalDateTime> order = (o1, o2) -> {
+            try {
+                return o1.compareTo(o2);
+            } catch (NullPointerException e) {
+                return 0;
+            }
+        };
+        Map<LocalDate, Collection<Task>> allGroupeByDate = new TreeMap<>();
         Collection<LocalDateTime> allDateTask = taskMap
                 .values()
                 .stream()
                 .map(Task::getDataTime)
+                .sorted(order)
                 .collect(Collectors.toList());
 
         for (LocalDateTime date : allDateTask
@@ -161,13 +159,54 @@ public class TaskService {
         int idNumber = Main.inputInt();
         try {
             taskMap.get(idNumber).toString();
-        }
-        catch (RuntimeException e) {
-//            throw new TaskNotFoundException ("Некорректный id");
+            //только при добавлении .toString или иного метода начинает обрабатывать исключение, в противном случае работает с null-задачей
+        } catch (RuntimeException e) {
+            //throw new TaskNotFoundException ("Некорректный id");
+            //можем выбрасывать исключение и останавливать работу программы или продолжать запрашивать корректный id
             System.out.println("Некорректный id");
             idNumber = findTask();
         }
         return idNumber;
+
+    }
+
+    public static void repeatTask(String title, String description, TypeTask type, AppearsIn appearsIn) {
+        LocalDateTime firstLDT = LocalDateTime.now();
+
+        switch (appearsIn) {
+            case DAILY_TASK:
+                for (int i = 0; i < LocalDateTime.now().toLocalDate().lengthOfYear()+1; i++) {
+                    Task temp = new Task(title, description, type, AppearsIn.DAILY_TASK, firstLDT.plusDays(i));
+                    taskMap.put(temp.getId(), temp);
+                }
+                break;
+            case WEEKLY_TASK:
+                for (int i = 0; i < (LocalDateTime.now().toLocalDate().lengthOfYear()/7+1); i++) {
+                    Task temp = new Task(title, description, type, AppearsIn.WEEKLY_TASK, firstLDT.plusWeeks(i));
+                    taskMap.put(temp.getId(), temp);
+                }
+            case MONTHLY_TASK:
+                for (int i = 0; i < 13; i++) {
+                    Task temp = new Task(title, description, type, AppearsIn.MONTHLY_TASK, firstLDT.plusMonths(i));
+                    taskMap.put(temp.getId(), temp);
+                }
+                break;
+            case YEARLY_TASK:
+                for (int i = 0; i < 2; i++) {
+                    Task temp = new Task(title, description, type, AppearsIn.YEARLY_TASK, firstLDT.plusYears(i));
+                    taskMap.put(temp.getId(), temp);
+                }
+                break;
+            case ONE_TIME_TASK:
+                Task temp = new Task(title, description, type, AppearsIn.ONE_TIME_TASK, firstLDT);
+                taskMap.put(temp.getId(), temp);
+                break;
+            default:
+                Task taskDefault = new Task(title, description, type, Task.appearsInDefault, firstLDT);
+                taskMap.put(taskDefault.getId(), taskDefault);
+                break;
+
+        }
 
     }
 
